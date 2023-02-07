@@ -5,13 +5,12 @@ from config import conf
 from common.log import logger
 import openai
 import time
+import random
 
 user_session = dict()
 
 # OpenAI对话模型API (可用)
-class OpenAIBot(Bot):
-    def __init__(self):
-        openai.api_key = conf().get('open_ai_api_key')
+class OpenAIBot(Bot):        
 
     def reply(self, query, context=None):
 
@@ -37,11 +36,12 @@ class OpenAIBot(Bot):
 
     def reply_text(self, query, user_id, retry_count=0):
         try:
+            openai.api_key = random.choice(conf().get('open_ai_api_key'))
             response = openai.Completion.create(
-                model="text-davinci-003",  # 对话模型的名称
+                model="text-chat-davinci-002-20221122",  # 对话模型的名称
                 prompt=query,
                 temperature=0.9,  # 值在[0,1]之间，越大表示回复越具有不确定性
-                max_tokens=1200,  # 回复最大的字符数
+                max_tokens=4000,  # 回复最大的字符数
                 top_p=1,
                 frequency_penalty=0.0,  # [-2,2]之间，该值越大则更倾向于产生不同的内容
                 presence_penalty=0.0,  # [-2,2]之间，该值越大则更倾向于产生不同的内容
@@ -68,11 +68,12 @@ class OpenAIBot(Bot):
 
     def create_img(self, query, retry_count=0):
         try:
+            openai.api_key = random.choice(conf().get('open_ai_api_key'))
             logger.info("[OPEN_AI] image_query={}".format(query))
             response = openai.Image.create(
                 prompt=query,    #图片描述
                 n=1,             #每次生成图片的数量
-                size="256x256"   #图片大小,可选有 256x256, 512x512, 1024x1024
+                size="1024x1024"   #图片大小,可选有 256x256, 512x512, 1024x1024
             )
             image_url = response['data'][0]['url']
             logger.info("[OPEN_AI] image_url={}".format(image_url))
