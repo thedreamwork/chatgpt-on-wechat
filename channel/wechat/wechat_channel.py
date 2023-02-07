@@ -41,7 +41,7 @@ class WechatChannel(Channel):
         content = msg['Text']
         if from_user_id == other_user_id:
             # 好友向自己发送消息
-            img_match_prefix = self.check_prefix(content, conf().get('image_create_prefix'))
+            img_match_prefix = self.check_prefix(content, ["画", "看", "找"])
             if img_match_prefix:
                 content = content.split(img_match_prefix, 1)[1].strip()
                 thead_pool.submit(self._do_send_img, content, from_user_id)
@@ -61,7 +61,7 @@ class WechatChannel(Channel):
             context['from_user_id'] = reply_user_id
             reply_text = super().build_reply_content(query, context)
             if reply_text:
-                self.send(conf().get("single_chat_reply_prefix") + reply_text, reply_user_id)
+                self.send(reply_text, reply_user_id)
         except Exception as e:
             logger.exception(e)
 
@@ -96,7 +96,7 @@ class WechatChannel(Channel):
         reply_text = super().build_reply_content(query, context)
         if reply_text:
             reply_text = '@' + msg['ActualNickName'] + ' ' + reply_text.strip()
-            self.send(conf().get("group_chat_reply_prefix", "") + reply_text, msg['User']['UserName'])
+            self.send(reply_text, msg['User']['UserName'])
 
 
     def check_prefix(self, content, prefix_list):

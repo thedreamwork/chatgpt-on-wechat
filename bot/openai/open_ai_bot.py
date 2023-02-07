@@ -6,6 +6,8 @@ from common.log import logger
 import openai
 import time
 import random
+import os
+
 
 user_session = dict()
 
@@ -36,7 +38,8 @@ class OpenAIBot(Bot):
 
     def reply_text(self, query, user_id, retry_count=0):
         try:
-            openai.api_key = random.choice(conf().get('open_ai_api_key'))
+            
+            openai.api_key = random.choice(os.environ.get('open_ai_api_key').split("#"))
             response = openai.Completion.create(
                 model="text-chat-davinci-002-20221122",  # 对话模型的名称
                 prompt=query,
@@ -68,12 +71,12 @@ class OpenAIBot(Bot):
 
     def create_img(self, query, retry_count=0):
         try:
-            openai.api_key = random.choice(conf().get('open_ai_api_key'))
+            openai.api_key = random.choice(os.environ.get('open_ai_api_key').split("#"))
             logger.info("[OPEN_AI] image_query={}".format(query))
             response = openai.Image.create(
                 prompt=query,    #图片描述
                 n=1,             #每次生成图片的数量
-                size="1024x1024"   #图片大小,可选有 256x256, 512x512, 1024x1024
+                size="512x512"   #图片大小,可选有 256x256, 512x512, 1024x1024
             )
             image_url = response['data'][0]['url']
             logger.info("[OPEN_AI] image_url={}".format(image_url))
@@ -103,7 +106,7 @@ class Session(object):
         :param user_id: from user id
         :return: query content with conversaction
         '''
-        prompt = conf().get("character_desc", "")
+        prompt = "你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你乐于回答人们的任何问题"
         if prompt:
             prompt += "\n\n"
         session = user_session.get(user_id, None)
@@ -117,7 +120,7 @@ class Session(object):
 
     @staticmethod
     def save_session(query, answer, user_id):
-        max_tokens = conf().get("conversation_max_tokens")
+        max_tokens = 2800
         if not max_tokens:
             # default 3000
             max_tokens = 1000
