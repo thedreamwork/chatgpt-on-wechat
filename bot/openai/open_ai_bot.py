@@ -71,7 +71,7 @@ class OpenAIBot(Bot):
 
     def create_img(self, query, retry_count=0):
         try:
-            openai.api_key = random.choice(["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","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","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","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", "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", "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"])
+            openai.api_key = random.choice(os.environ.get('open_ai_api_key').split("#"))
             logger.info("[OPEN_AI] image_query={}".format(query))
             response = openai.Image.create(
                 prompt=query,    #图片描述
